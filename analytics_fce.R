@@ -41,18 +41,26 @@ cat %>%
   group_by(type, categoria2) %>% 
   mutate(decil_rank = ntile(elo,10)) -> cat
 
-cat %>% 
-  filter(categoria2 == "03 - Senior") %>% 
-  ggplot(aes(x = elo, color = type)) + geom_density() +
-  geom_vline(x=rank)
-
 
 cat %>% 
   group_by(categoria2, type, decil_rank) %>% 
   summarise(avg_elo = mean(elo),
             min_elo = min(elo),
             max_elo = max(elo),
-            median_elo = median(elo)) -> elos_by_cat
+            median_elo = median(elo),
+            std_elo = sd(elo)) -> elos_by_cat
+
+# Quick plot
+cat %>% 
+  ggplot(aes(x=as.factor(decil_rank), y=elo)) + geom_boxplot() +
+  facet_wrap(~type)
+
+cat %>% 
+  ggplot(aes(x=elo, color=as.factor(decil_rank))) + geom_density() +
+  facet_wrap(~ categoria2 + type)
 
 
+cat %>% 
+  filter(categoria2 == "03 - Senior", type == "standard") %>% 
+  ggplot(aes(x=elo, color=as.factor(decil_rank))) + geom_density()
 
